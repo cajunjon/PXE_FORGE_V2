@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # PXE Server Bootstrap Script for Ubuntu 24.04
-# Author: Auto-generated script
+# Author: John Gautreaux
 # Description: Automated setup of PXE boot server with Ubuntu 24.04
 
 set -e  # Exit on any error

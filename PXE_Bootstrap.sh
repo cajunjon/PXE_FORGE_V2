@@ -189,7 +189,7 @@ configure_dnsmasq() {
 # PXE Server Configuration
 interface=$PXE_INTERFACE
 bind-interfaces
-dhcp-range=$DHCP_START,$DHCP_END,12h
+dhcp-range="$DHCP_START","$DHCP_END",12h
 
 # TFTP Configuration
 enable-tftp

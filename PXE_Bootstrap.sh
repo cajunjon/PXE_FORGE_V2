@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # PXE Server Bootstrap Script for Ubuntu 24.04
-# Author: John Gautreaux
+# Author: Cajunjon
+# Version 0.2.0
 # Description: Automated setup of PXE boot server with Ubuntu 24.04
 
 set -e  # Exit on any error
@@ -71,7 +72,7 @@ get_user_input() {
     detect_interfaces
     
     # Get PXE interface
-    read -p "Enter the network interface for PXE (e.g., ens160, eth1): " PXE_INTERFACE
+    read -pr "Enter the network interface for PXE (e.g., ens160, eth1): " PXE_INTERFACE
     
     if [[ -z "$PXE_INTERFACE" ]]; then
         print_error "Interface name cannot be empty"
@@ -85,18 +86,18 @@ get_user_input() {
     fi
     
     # Get network configuration
-    read -p "Enter PXE server IP address [$PXE_IP]: " input_ip
+    read -pr "Enter PXE server IP address [$PXE_IP]: " input_ip
     PXE_IP=${input_ip:-$PXE_IP}
     
     # Extract subnet from IP
-    PXE_SUBNET=$(echo $PXE_IP | cut -d'.' -f1-3)
+    PXE_SUBNET=$(echo "$PXE_IP" | cut -d'.' -f1-3)
     DHCP_START="$PXE_SUBNET.100"
     DHCP_END="$PXE_SUBNET.200"
     
-    read -p "Enter DHCP range start [$DHCP_START]: " input_start
+    read -pr "Enter DHCP range start [$DHCP_START]: " input_start
     DHCP_START=${input_start:-$DHCP_START}
     
-    read -p "Enter DHCP range end [$DHCP_END]: " input_end
+    read -pr "Enter DHCP range end [$DHCP_END]: " input_end
     DHCP_END=${input_end:-$DHCP_END}
     
     echo ""
@@ -105,7 +106,7 @@ get_user_input() {
     echo "  PXE Server IP: $PXE_IP"
     echo "  DHCP Range: $DHCP_START - $DHCP_END"
     echo ""
-    read -p "Continue with this configuration? [y/N]: " confirm
+    read -pr "Continue with this configuration? [y/N]: " confirm
     if [[ ! "$confirm" =~ ^[Yy]$ ]]; then
         print_error "Installation cancelled by user"
         exit 0
@@ -142,8 +143,8 @@ configure_network() {
     print_header "CONFIGURING NETWORK INTERFACE"
     
     # Backup existing netplan configuration
-    sudo cp /etc/netplan/*.yaml /etc/netplan/backup-$(date +%Y%m%d-%H%M%S).yaml 2>/dev/null || true
-    
+sudo cp /etc/netplan/*.yaml "/etc/netplan/backup-$(date +%Y%m%d-%H%M%S).yaml" 2>/dev/null || true
+ 
     # Create new netplan configuration
     print_status "Creating netplan configuration..."
     
@@ -409,7 +410,7 @@ start_services() {
 create_autoinstall() {
     print_header "CREATING AUTOINSTALL CONFIGURATION (OPTIONAL)"
     
-    read -p "Do you want to create an autoinstall configuration for unattended installations? [y/N]: " create_auto
+    read -pr "Do you want to create an autoinstall configuration for unattended installations? [y/N]: " create_auto
     
     if [[ "$create_auto" =~ ^[Yy]$ ]]; then
         print_status "Creating autoinstall configuration..."
@@ -454,7 +455,7 @@ EOF
         echo "" | sudo tee /var/www/html/ubuntu/server/meta-data > /dev/null
         
         # Update PXE menu to include autoinstall option
-        sudo sed -i '/APPEND initrd=images\/initrd ip=dhcp url=/s/$/ ds=nocloud-net;s=http:\/\/'$PXE_IP'\/ubuntu\/server\//' /var/lib/tftpboot/pxelinux.cfg/default
+        sudo sed -i '/APPEND initrd=images\/initrd ip=dhcp url=/s/$/ ds=nocloud-net;s=http:\/\/'"$PXE_IP"'\/ubuntu\/server\//' /var/lib/tftpboot/pxelinux.cfg/default
         
         print_status "Autoinstall configuration created"
         print_warning "Default password is 'ubuntu123' - please change this in production!"
